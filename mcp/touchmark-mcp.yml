@@ -1,0 +1,34 @@
+generated: '2026-07-21'
+method: derived
+status: candidate
+source: https://docs.touchmark.ai/sdk/reference
+name: Touchmark MCP Server (candidate)
+description: No official hosted or remote MCP server was found for Touchmark
+  (checked docs.touchmark.ai and the touchmark.ai site; the product is a
+  private-beta TypeScript SDK over HTTP/gRPC). This candidate tool list is
+  derived from the four documented session methods of @touchmark/sdk - the
+  provider publishes no OpenAPI, so tools map to SDK methods rather than
+  operationIds.
+server:
+  name: touchmark
+  transport: http
+  url: null
+tools:
+  - name: start_session
+    description: Open - or idempotently re-fetch - the pricing session for a
+      scope (scope_id, user_id); returns the server-minted session_id.
+    source_operation: '@touchmark/sdk#session.start'
+  - name: emit_event
+    description: Emit one event (session_id, event_id, event_idx, event_type,
+      payload, optional base_price_usd). Fire-and-forget; event_id is the
+      idempotency key.
+    source_operation: '@touchmark/sdk#session.emit'
+  - name: end_session
+    description: Close a session early, shedding its long-poll load and freeing
+      the scope_id.
+    source_operation: '@touchmark/sdk#session.end'
+  - name: stream_valuations
+    description: Cursor-resumable stream of valuations for a session - the sole
+      channel valuations arrive on (event_id, valuation_number, eval_scores,
+      eval_explanations, fair_price_usd, delta_usd).
+    source_operation: '@touchmark/sdk#session.streamValuations'

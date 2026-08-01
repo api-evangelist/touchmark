@@ -1,0 +1,56 @@
+generated: '2026-07-21'
+method: derived
+source: https://docs.touchmark.ai/sdk/reference
+name: Touchmark Conformance
+description: Industry and cross-cutting standards posture, derived from the
+  official SDK documentation (no OpenAPI is published; wire contract is
+  protobuf/gRPC). No published compliance program (SOC 2 / ISO 27001 etc.) was
+  found - the company is a 2-person YC S26 private beta.
+standards:
+  - id: oauth2
+    conforms: false
+    evidence: Auth is a static API key sent as a Bearer token; no OAuth2 flows,
+      scopes, or authorization server are documented, and
+      /.well-known/oauth-authorization-server on touchmark.ai is an SPA fallback
+      (api.touchmark.ai returns 404).
+  - id: oidc
+    conforms: false
+    evidence: No OpenID Connect surface; /.well-known/openid-configuration
+      serves the SPA fallback page, not a discovery document.
+  - id: idempotency
+    conforms: true
+    evidence: event_id is an explicit per-session idempotency key the server
+      de-duplicates on retries; session.start is idempotent on scope_id; the
+      valuation apply model is idempotent by construction (absolute
+      fair_price_usd). (docs.touchmark.ai/sdk/reference)
+  - id: at-least-once-delivery
+    conforms: true
+    evidence: streamValuations documents at-least-once delivery with a
+      cursor-resumable long-poll and idempotent absolute-price application.
+  - id: grpc-protobuf
+    conforms: true
+    evidence: The docs state the SDK is "a hand-written, idiomatic wrapper over
+      the generated client for Touchmark's wire contract" defined in
+      proto/touchmark/v1/session.proto (protobuf/gRPC); the proto itself is not
+      publicly published.
+  - id: rfc9457-problem-details
+    conforms: false
+    evidence: Errors are a closed set of seven SDK-level TouchmarkError codes,
+      not application/problem+json documents.
+  - id: rfc8594-sunset
+    conforms: false
+    evidence: No Sunset/Deprecation header or deprecation policy is documented.
+  - id: json-api
+    conforms: false
+    evidence: Payloads are free-form JSON validated against per-application
+      schemas registered at onboarding; no JSON:API media type.
+  - id: pagination
+    conforms: false
+    evidence: No page-based list endpoints; the only iteration surface is the
+      cursor-resumable valuation stream.
+  - id: fapi
+    conforms: false
+    evidence: Not a financial-grade API; no FAPI profile claimed.
+  - id: scim
+    conforms: false
+    evidence: No user-provisioning surface documented.

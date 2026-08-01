@@ -1,0 +1,31 @@
+generated: '2026-07-21'
+method: searched
+source: https://docs.touchmark.ai/sdk/reference
+docs: https://docs.touchmark.ai/sdk/quickstart
+summary:
+  types: [apiKey]
+  api_key_in: [header]
+  oauth2_flows: []
+schemes:
+  - name: api_key
+    type: apiKey
+    in: header
+    header: Authorization
+    scheme: Bearer
+    description: >-
+      The api_key is sent as "Authorization: Bearer <api_key>". It is a
+      secret that both authenticates the caller and identifies the application
+      (the product being integrated) - the unit event-type schemas and evals are
+      registered against - so no separate application id is passed. Configured
+      once per client (new Touchmark({ api_key })), one client per backend
+      service. During the private beta keys are provisioned by hand by a
+      Touchmark contact and stored as TOUCHMARK_API_KEY. A missing, wrong, or
+      under-permissioned key surfaces as a TouchmarkError with code "auth" -
+      never retryable, always thrown (it never degrades).
+    sources:
+      - https://docs.touchmark.ai/sdk/reference
+      - https://docs.touchmark.ai/sdk/errors-and-recovery
+notes:
+  - No OAuth2, OIDC, or mutualTLS surface is documented; there is no scopes or
+    permissions reference. OAuth scopes artifact intentionally skipped
+    (key-auth-only provider).

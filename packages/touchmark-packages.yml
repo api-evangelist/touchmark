@@ -1,0 +1,23 @@
+generated: '2026-07-21'
+method: searched
+source: https://docs.touchmark.ai/sdk/quickstart
+packages:
+  - language: typescript
+    registry: npm
+    name: '@touchmark/sdk'
+    url: https://docs.touchmark.ai/sdk/overview
+    install: npm install @touchmark/sdk
+    official: true
+    status: private-beta
+    notes: First-party TypeScript SDK - "the reference for the TypeScript SDK
+      (@touchmark/sdk)". Not yet on the public npm registry
+      (registry.npmjs.org/@touchmark/sdk returns 404 as of 2026-07-21); the
+      quickstart says "During the private beta we'll give you access to the
+      package directly (the install command may differ, but the import -
+      @touchmark/sdk - is always the same)". Hand-written idiomatic wrapper over
+      a generated client for the protobuf/gRPC wire contract.
+registry_checks:
+  - {registry: npm, name: '@touchmark/sdk', status: 404}
+  - {registry: npm, name: touchmark, status: 404, note: unrelated/absent}
+  - {registry: pypi, name: touchmark, status: 404}
+  - {registry: github, org: Touchmark-AI, status: 200, public_repos: 0}

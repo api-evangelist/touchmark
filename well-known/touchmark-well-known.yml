@@ -1,0 +1,50 @@
+generated: '2026-07-21'
+method: searched
+note: touchmark.ai is a single-page app whose router returns HTTP 200 with the
+  index HTML shell for every path, so 200s on that host are SPA fallbacks, not
+  real discovery documents - none were saved as raw files. api.touchmark.ai
+  returns real 404s. robots.txt is the only genuine plain-text document found.
+hosts:
+  - host: https://touchmark.ai
+    documents:
+      - path: /.well-known/security.txt
+        status: 200
+        spa_fallback: true
+      - path: /.well-known/openid-configuration
+        status: 200
+        spa_fallback: true
+      - path: /.well-known/oauth-authorization-server
+        status: 200
+        spa_fallback: true
+      - path: /.well-known/api-catalog
+        status: 200
+        spa_fallback: true
+      - path: /.well-known/ai-plugin.json
+        status: 200
+        spa_fallback: true
+      - path: /llms.txt
+        status: 200
+        spa_fallback: true
+      - path: /robots.txt
+        status: 200
+        spa_fallback: false
+        note: 'Genuine text/plain: allows all, disallows /private/ and /terminal/.'
+      - path: /sitemap.xml
+        status: 200
+        spa_fallback: true
+  - host: https://api.touchmark.ai
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /openapi.json
+        status: 404
+      - path: /openapi.yaml
+        status: 404
+  - host: https://docs.touchmark.ai
+    documents:
+      - path: /llms.txt
+        status: 404
+      - path: /llms-full.txt
+        status: 404
+      - path: /sitemap.xml
+        status: 404

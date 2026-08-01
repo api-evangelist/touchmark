@@ -1,0 +1,75 @@
+generated: '2026-07-21'
+method: searched
+source: https://docs.touchmark.ai/sdk/reference
+name: Touchmark Data Model
+description: Entity-relationship graph of the Touchmark pricing domain, taken
+  from the documented mental model (Session, Event, Valuation) and the SDK type
+  reference. No OpenAPI exists; the wire contract is protobuf
+  (proto/touchmark/v1/session.proto), not publicly published.
+entities:
+  - name: Application
+    description: The product being integrated (a raw model API, an agent
+      platform, internal tooling). Identified by the api_key; the unit
+      event-type schemas and evals are registered against, configured with
+      Touchmark at onboarding.
+    key: api_key (implicit)
+  - name: Scope
+    description: The integrator's own durable pricing context id - a project,
+      document, or conversation. Identified by the caller-supplied scope_id and
+      owned by an end user (user_id).
+    key: scope_id (caller-minted, durable)
+  - name: Session
+    description: One pricing context opened per scope. Server-minted session_id;
+      idempotently fetched or created by session.start on scope_id. Lapses after
+      about a week without emits. Its session_id is also the URL token of the
+      public session page.
+    key: session_id (server-minted)
+  - name: Event
+    description: Something worth pricing or scoring - emitted with a payload and
+      optionally a base_price_usd (omit for a context event that is scored with
+      but settles no money). Ordered in the session log by event_idx.
+    key: event_id (unique within session; idempotency key)
+    fields: [event_id, event_idx, event_type, payload, base_price_usd]
+  - name: Valuation
+    description: Touchmark's verdict for one priced event - eval scores in
+      [0,1], the judge's sparse eval_explanations, the absolute fair_price_usd
+      to apply, and the informational delta_usd. Re-valuations (valuation_number
+      2+) revise the same event later.
+    key: (event_id, valuation_number)
+    fields: [event_id, valuation_number, eval_scores, eval_explanations,
+      fair_price_usd, delta_usd]
+  - name: Eval
+    description: A scoring dimension registered per application at onboarding -
+      deterministic evals are score-only; LLM-judge evals also carry prose
+      explanations. Keyed by eval_id in eval_scores/eval_explanations maps.
+    key: eval_id
+relationships:
+  - from: Application
+    to: Session
+    kind: has_many
+    via: api_key
+  - from: Scope
+    to: Session
+    kind: has_one
+    via: scope_id
+    notes: One open session per scope at a time; a lapsed scope gets a fresh
+      session from the next start.
+  - from: Session
+    to: Event
+    kind: has_many
+    via: session_id
+    notes: Log ordered by event_idx, contiguous from 0 per session.
+  - from: Event
+    to: Valuation
+    kind: has_many
+    via: event_id
+    notes: valuation_number 1 is the first verdict; 2+ are re-valuations. The
+      supplied base_price_usd acts as the initial valuation (fair_0).
+  - from: Application
+    to: Eval
+    kind: has_many
+    via: onboarding registration
+  - from: Valuation
+    to: Eval
+    kind: references
+    via: eval_id keys in eval_scores

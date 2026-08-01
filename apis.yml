@@ -1,8 +1,28 @@
 aid: touchmark
 name: Touchmark
-description: Touchmark is a company surfaced as a portfolio company of y-combinator and added to the API
-  Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+description: Touchmark is solving AI pricing - instead of AI being priced per
+  token regardless of quality, Touchmark prices it by the quality, efficiency,
+  and value of the output, so spend is fair, predictable, and tied to what you
+  actually get. Applications emit the events they already produce (model
+  outputs, tool calls, code diffs) with a base price, and Touchmark's
+  out-of-band judge returns a quality-adjusted fair price for each event on a
+  separate valuation stream. A Y Combinator Summer 2026 company founded by Ilia
+  Bolgov and Roman Yanushevskyi in San Francisco; the TypeScript SDK
+  (@touchmark/sdk) is in private beta.
 url: https://raw.githubusercontent.com/api-evangelist/touchmark/refs/heads/main/apis.yml
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://touchmark.ai/og-image.png
 x-type: company
 x-source: vc-portfolio
 x-backed-by:
@@ -11,12 +31,90 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-21'
 tags:
 - Company
-apis: []
+- Artificial Intelligence
+- AI Pricing
+- Billing
+- Monetization
+- Evals
+- Usage-Based Billing
+- Quality Scoring
+apis:
+- name: Touchmark Sessions API
+  description: The pricing surface behind @touchmark/sdk - open a session per
+    scope, emit events fire-and-forget with an idempotent event_id, and consume
+    quality-adjusted valuations (absolute fair_price_usd per event) on a
+    cursor-resumable stream. HTTP transport (long-poll in v1) over a
+    protobuf/gRPC wire contract (proto/touchmark/v1/session.proto); Bearer
+    api_key auth. Private beta - no public OpenAPI is published.
+  humanURL: https://docs.touchmark.ai/sdk/overview
+  baseURL: https://api.touchmark.ai
+  tags:
+  - AI Pricing
+  - Sessions
+  - Events
+  - Valuations
+  properties:
+  - type: Documentation
+    url: https://docs.touchmark.ai/sdk/overview
+  - type: APIReference
+    url: https://docs.touchmark.ai/sdk/reference
+  - type: GettingStarted
+    url: https://docs.touchmark.ai/sdk/quickstart
+common:
+- type: DomainSecurity
+  url: security/touchmark-domain-security.yml
+- type: Website
+  url: https://touchmark.ai
+- type: Documentation
+  url: https://docs.touchmark.ai
+- type: APIReference
+  url: https://docs.touchmark.ai/sdk/reference
+- type: GettingStarted
+  url: https://docs.touchmark.ai/sdk/quickstart
+- type: Login
+  url: https://app.touchmark.ai/signin
+- type: GitHubOrganization
+  url: https://github.com/Touchmark-AI
+- type: XTwitter
+  url: https://x.com/TouchmarkAI
+- type: LinkedIn
+  url: https://www.linkedin.com/company/touchmark-ai
+- type: Packages
+  url: packages/touchmark-packages.yml
+- type: SDKs
+  url: packages/touchmark-packages.yml
+- type: WellKnown
+  url: well-known/touchmark-well-known.yml
+- type: MCPServer
+  url: mcp/touchmark-mcp.yml
+- type: LLMsTxt
+  url: llms/touchmark-llms.txt
+- type: Conformance
+  url: conformance/touchmark-conformance.yml
+- type: ErrorCatalog
+  url: errors/touchmark-error-codes.yml
+- type: Lifecycle
+  url: lifecycle/touchmark-lifecycle.yml
+- type: Authentication
+  url: authentication/touchmark-authentication.yml
+- type: Conventions
+  url: conventions/touchmark-conventions.yml
+- type: Idempotency
+  url: conventions/touchmark-conventions.yml
+- type: Components
+  url: components/touchmark-components.yml
+- type: DataModel
+  url: data-model/touchmark-data-model.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+x-enrichment:
+  date: '2026-07-21'
+  status: enriched
+  artifacts_added: 12
+  pass: local-v1

@@ -1,0 +1,64 @@
+generated: '2026-07-21'
+method: searched
+source: https://docs.touchmark.ai/sdk/errors-and-recovery
+name: Touchmark Error Catalog
+description: Every failure the Touchmark SDK surfaces is a TouchmarkError with a
+  .code from a closed set of seven. The docs instruct integrators to branch on
+  .code, never on the message. Errors surface through the TypeScript SDK
+  (@touchmark/sdk) over the HTTP transport to api.touchmark.ai.
+envelope:
+  class: TouchmarkError
+  fields:
+    - name: code
+      type: TouchmarkErrorCode
+      description: One of the seven closed error codes.
+    - name: cause
+      type: unknown
+      description: The underlying error the SDK translated (optional).
+errors:
+  - code: session_closed
+    meaning: The session lapsed (about 1 week with no emits) and the server closed
+      it. Consuming the valuation stream does not reset the clock.
+    action: Re-open with session.start (idempotent on scope_id), then re-emit with
+      the same event_id and event_idx reset to 0. Wrap this recovery once.
+    retryable: true
+  - code: session_not_found
+    meaning: The session_id is not one the server knows (usually a stale or
+      hand-built id).
+    action: Re-open the scope with session.start and use the fresh id.
+    retryable: true
+  - code: auth
+    meaning: The api_key is missing, wrong, or lacks permission.
+    action: Fix the credential or configuration. Not retryable - fail loud. Always
+      throws, never degrades.
+    retryable: false
+  - code: invalid_payload
+    meaning: The payload, event_idx, or base_price_usd failed validation - either
+      client-side (not JSON-serializable, out of range) or server-side (does not
+      match the schema registered for the application's event_type).
+    action: Fix the event data; it is a caller bug. Client-side checks throw before
+      anything is sent, with a path to the offending value.
+    retryable: false
+  - code: timeout
+    meaning: A network attempt exceeded its deadline. This is a transport deadline,
+      not an eval-completion SLA (scoring is asynchronous and unbounded).
+    action: Transient - retry later (e.g. via your outbox).
+    retryable: true
+  - code: unreachable
+    meaning: Touchmark could not be reached at all.
+    action: Handled by default via degraded mode - emit and end swallow the outage,
+      return normally, and fire the onDegrade hook. A degraded emit is not
+      delivered and not buffered; re-emit with the same event_id from your own
+      outbox. session.start always throws instead of degrading.
+    retryable: true
+  - code: rate_limited
+    meaning: Quota exceeded. The SDK already retried internally with full-jitter
+      exponential backoff inside the call's timeout_ms budget.
+    action: If it still surfaces, back off and retry later; if persistent, the
+      integration is over quota - contact Touchmark about limits.
+    retryable: true
+notes:
+  - Every non-unreachable error always throws, even in non-strict mode. Degraded
+    mode only ever swallows a genuine outage.
+  - streamValuations is separate from degraded mode - it reconnects from its held
+    cursor on transient drops and surfaces only fatal errors (e.g. auth).

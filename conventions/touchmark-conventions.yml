@@ -1,0 +1,94 @@
+generated: '2026-07-21'
+method: searched
+source: https://docs.touchmark.ai/sdk/reference
+docs: https://docs.touchmark.ai/sdk/overview
+name: Touchmark API Conventions
+description: Cross-cutting request/response semantics of the Touchmark pricing
+  API, as documented in the official TypeScript SDK reference. Touchmark prices
+  AI by the quality of its output - apps emit events (model outputs, tool
+  calls, code diffs) and consume quality-adjusted valuations on a separate
+  stream. The public surface is the @touchmark/sdk client over HTTP to
+  https://api.touchmark.ai; the wire contract underneath is protobuf/gRPC
+  (proto/touchmark/v1/session.proto) wrapped by a generated client.
+authentication:
+  style: api-key
+  header: 'Authorization: Bearer <api_key>'
+  notes: The api_key both authenticates and identifies the application (the unit
+    event-type schemas and evals are registered against). Keys are issued by hand
+    during the private beta. See authentication/touchmark-authentication.yml.
+idempotency:
+  supported: true
+  mechanisms:
+    - name: event_id
+      scope: per-session
+      description: Every emitted event carries an event_id that is unique within
+        the session and doubles as its idempotency key - reuse it verbatim on a
+        retry and the server de-duplicates. Reusing an id for a different event
+        causes the second to be treated as a retry and silently dropped, so
+        distinct events need distinct ids (newEventId() mints a UUIDv4).
+    - name: scope_id
+      scope: session lifecycle
+      description: session.start is idempotent on scope_id - calling it again
+        returns the current open session or mints a fresh one if the previous
+        lapsed, so crash recovery is just calling start again.
+    - name: absolute-valuation apply
+      scope: consumer side
+      description: Valuations carry the absolute fair_price_usd, so re-applying
+        the same valuation is a no-op. At-least-once redelivery on stream
+        reconnect cannot double-charge.
+ordering:
+  field: event_idx
+  description: Per-session counter, contiguous from 0, stamped at the event's
+    birth. The engine orders the event log by event_idx, not arrival, so
+    out-of-order or late emits slot in correctly. Resets to 0 when a new session
+    is opened.
+pagination:
+  style: cursor-stream
+  description: No page-based list endpoints are documented. Valuations arrive on
+    a cursor-resumable pull stream (streamValuations) with an opaque from_cursor;
+    the cursor is held in memory for the life of the call and delivery is
+    at-least-once. v1 realizes the stream as a repeated long-poll.
+delivery:
+  model: fire-and-forget emit + separate valuation stream
+  description: emit returns nothing and carries no valuation - scoring runs
+    out-of-band on a judge with no bounded latency. Valuations arrive only on
+    streamValuations, one consumer per session (the stream is a broadcast with
+    no server-side fencing; multi-instance backends must single-flight the
+    consumer via a lease keyed by session_id or by routing a scope to one
+    worker).
+error_envelope:
+  class: TouchmarkError
+  codes: [session_closed, session_not_found, auth, invalid_payload, timeout,
+    unreachable, rate_limited]
+  notes: Branch on .code, never the message. See errors/touchmark-error-codes.yml.
+rate_limits:
+  signaling: rate_limited error code
+  behavior: The SDK retries rate_limited internally with full-jitter exponential
+    backoff inside the call's timeout_ms budget (default 10000 ms total,
+    including retries); if it still surfaces, the caller backs off and retries
+    later.
+timeouts:
+  option: timeout_ms
+  default_ms: 10000
+  notes: Total budget for a call including its internal retries, not per-attempt.
+degraded_mode:
+  default: fail-safe (strict false)
+  description: When Touchmark is unreachable, emit and end swallow the outage,
+    return normally, and fire the onDegrade hook; a degraded emit is not
+    delivered or buffered, so the supplied base_price_usd stands unless the
+    caller re-emits with the same event_id. start always throws. strict true
+    opts out everywhere.
+versioning:
+  scheme: v1 (protobuf package touchmark.v1)
+  notes: v1 realizes the valuation stream as long-poll; server-push is described
+    as a later additive upgrade behind the same method. Multi-currency is
+    undefined in v1 (USD only).
+money:
+  currency: USD
+  precision: micro-USD ($0.000001) - the smallest unit Touchmark settles in;
+    prices sent are rounded to 6 decimals, prices received are exact.
+cross_links:
+  errors: errors/touchmark-error-codes.yml
+  authentication: authentication/touchmark-authentication.yml
+  lifecycle: lifecycle/touchmark-lifecycle.yml
+  data_model: data-model/touchmark-data-model.yml

@@ -1,0 +1,41 @@
+generated: '2026-07-21'
+method: searched
+source: https://docs.touchmark.ai/sdk/reference
+name: Touchmark Lifecycle
+versioning:
+  scheme: protobuf-package
+  current: v1
+  docs: https://docs.touchmark.ai/sdk/overview
+  notes: The wire contract is proto/touchmark/v1/session.proto (touchmark.v1).
+    The docs commit to additive evolution in at least one place - v1 realizes the
+    valuation stream as a repeated long-poll, and server-push is described as "a
+    later, additive upgrade behind this exact same method - your code won't
+    change". Payload schemas live server-side per application, so new event
+    shapes are added "without an SDK upgrade". Multi-currency is undefined in v1
+    (USD only).
+deprecation:
+  policy_url: null
+  sunset_header: false
+  notes: No deprecation policy or RFC 8594 Sunset/Deprecation header support is
+    published.
+sla:
+  url: null
+  notes: No SLA is published. The docs explicitly state scoring latency is
+    unbounded - a network timeout "is not an eval-completion SLA (scoring is
+    asynchronous and unbounded)".
+status_page: null
+session_lifecycle:
+  - Sessions are opened per scope with session.start (idempotent on scope_id).
+  - Sessions lapse server-side after about one week with no emits; consuming the
+    valuation stream does not reset the clock. The next emit or end on a lapsed
+    session throws session_closed.
+  - session.end closes a session early, shedding its long-poll load and freeing
+    the scope_id for a fresh session; late re-valuations still arrive on the
+    stream after end.
+  - The public no-account session page shows the last 24 hours of session
+    activity; older events stay in Touchmark's retained log.
+maturity:
+  stage: private-beta
+  evidence: 'Quickstart step 0: "During the private beta we set up each account
+    by hand." Y Combinator Summer 2026 batch, team of 2.'
+deprecated_operations: []

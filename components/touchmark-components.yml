@@ -1,0 +1,23 @@
+generated: '2026-07-21'
+method: searched
+source: https://docs.touchmark.ai/sdk/reference
+name: Touchmark Hosted Surfaces
+description: Touchmark ships no embeddable JS/web-component library, but the SDK
+  reference documents one hosted, prebuilt end-user surface integrators link
+  into their own billing UX.
+components:
+  - family: hosted-pages
+    name: Public session page
+    kind: hosted
+    description: Every session has a public, no-account, shareable page whose
+      sole purpose is to explain, per event, what was scored and how the price
+      moved - base_price_usd, then each valuation's eval_scores, fair_price_usd,
+      and delta_usd. Its URL token is the session_id and the page is live from
+      session.start onward, intended to be dropped into surcharge/refund notices
+      or invoice line items. Shows the last 24 hours of session activity; the
+      exact URL format is shared at onboarding (not publicly documented).
+    docs: https://docs.touchmark.ai/sdk/reference
+notes:
+  - The alternative documented path is render-it-yourself from the persisted
+    valuation stream (eval_scores, fair_price_usd, delta_usd,
+    eval_explanations), with no dependency on the hosted page.
