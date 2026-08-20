@@ -54,6 +54,11 @@ apis:
   tags:
   - AI Pricing
   - Sessions
+  - Event
+  - Valuations
+  tags_raw:
+  - AI Pricing
+  - Sessions
   - Events
   - Valuations
   properties:
